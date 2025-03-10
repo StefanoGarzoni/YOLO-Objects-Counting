@@ -75,7 +75,7 @@ Ideal for automated sorting systems or production lines requiring direct machine
 
 ------------------------------------------------------------
 
-🔧 Customization & Extensibility  
+🔧 CUSTOMIZATION & EXTENSIBILITY  
 - All three programs are designed with modular components, making it easy to:  
 - Swap detection models.
 - Adjust counting logic for specific industrial needs.  
@@ -83,10 +83,10 @@ Ideal for automated sorting systems or production lines requiring direct machine
   
 -------------------------------------------------------------
 
-💡 Why This System?  
+💡 WHY THIS SYSTEM?  
 This project was developed to address real-world industrial needs, providing a flexible, accurate, and easy-to-use object counting system. By combining real-time deep learning-based detection, an intuitive GUI, and hardware interaction capabilities, it offers an adaptable solution for smart factories, automated warehouses, and production monitoring.
 
 -------------------------------------------------------------
 
-📌 Want to customize it for your specific use case?  
+📌 WANT TO CUSTOMIZE IT FOR YOUR SPECIFIC USE CASE?    
 All features are modular and can be adjusted to fit your needs. Start building your own YOLO-powered counting system today! 🚀
