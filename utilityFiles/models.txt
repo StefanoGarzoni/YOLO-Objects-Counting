@@ -1,0 +1,6 @@
+modelli_in_uso/model1.pt;nameModel1
+modelli_in_uso/model2.pt;nameModel2
+modelli_in_uso/model3.pt;nameModel3
+modelli_in_uso/model4.pt;nameModel4
+modelli_in_uso/model5.pt;nameModel5
+
