@@ -1,5 +1,5 @@
 # Garzoni Stefano 
-#programm main with GPIO
+#main program with GPIO
 import sys
 from PyQt5.QtWidgets import QWidget, QApplication,QMessageBox
 from countingYoloRT import Ui_MainWindow
@@ -15,9 +15,9 @@ from ultralytics import YOLO
 import supervision as sv
 import Jetson.GPIO as GPIO 
 
-import subprocess   #libreria per il riavvio del programma
+import subprocess   #library for program restart
 
-#libreria per la gestione di un errore nei file di sistema
+#library for handling system file error
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
@@ -25,9 +25,9 @@ LINE_START = sv.Point(230, 480) #720, 0   |320, 0
 LINE_END = sv.Point(230, 0)#720, 1000  |320, 480
 RELAY_PIN = 7
 
-#thread contenente il for
+#thread containing the for loop
 class Worker(QObject):   
-    #creazione variabili
+    #variable creation
     space = [0,0,1,0,0,0,0,0]
     go = False
     last = 0
@@ -39,7 +39,7 @@ class Worker(QObject):
     model = None
     modello = ""
     enter = "\n"
-    start = "Lavorazione n. "
+    start = "Processing n. "
     separatore = "------------------------------------------"
     first = 1
     start = True
@@ -47,18 +47,18 @@ class Worker(QObject):
     crN=[]
     crC=[]
     
-    #creazione impulsi del thread
-    txtObjTotEdit = pyqtSignal(str) #impulso per modificare il campo di testo del totale
-    txtObjInEdit = pyqtSignal(str)  #impulso per modificare il campo di testo degli oggetti contati
-    txtObjOutEdit = pyqtSignal(str) #impulso per modificare il campo di testo degli oggetti in uscita
-    txtLavEdit = pyqtSignal(str)    #impulso per modificare il campo di testo del cambio lavorazione
-    pixmapSet = pyqtSignal(QPixmap) #impulso per inviare alla label i frame del video
-    stop = pyqtSignal() #impulso per fermare il programma a fine lavorazione
-    fineLav = pyqtSignal(str, str)  #impulso per indicare la fine lavorazione (utile per la message box)
-    startLav = pyqtSignal() #impulso per segnare che inizia la lavorazione
+    #thread signal creation
+    txtObjTotEdit = pyqtSignal(str) #signal to modify the total text field
+    txtObjInEdit = pyqtSignal(str)  #signal to modify the counted objects text field
+    txtObjOutEdit = pyqtSignal(str) #signal to modify the outgoing objects text field
+    txtLavEdit = pyqtSignal(str)    #signal to modify the processing change text field
+    pixmapSet = pyqtSignal(QPixmap) #signal to send video frames to the label
+    stop = pyqtSignal() #signal to stop the program at the end of processing
+    fineLav = pyqtSignal(str, str)  #signal to indicate the end of processing (useful for the message box)
+    startLav = pyqtSignal() #signal to mark the start of processing
     write = pyqtSignal()
     
-    #funzione contenente il FOR della detection Object
+    #function containing the FOR loop for object detection
     def run(self):
         self.line_counter = sv.LineZone(start=LINE_START, end=LINE_END)
         line_annotator = sv.LineZoneAnnotator(thickness=2, text_thickness=1, text_scale=0.5)
@@ -116,7 +116,7 @@ class Worker(QObject):
                     
                 self.last = self.line_counter.in_count
                 
-                #adattamento frame immagine a QImage per mostrarlo
+                #adapt frame image to QImage for display
                 height, width, bytesPerComponent = frame.shape
                 bytesPerLine = bytesPerComponent * width
                 
@@ -124,19 +124,19 @@ class Worker(QObject):
                 
                 image = QImage(frame_rgb.data, width, height, bytesPerLine, QImage.Format_RGB888)
                 
-                #impulsi emessi dal Thread
+                #signals emitted by the Thread
                 self.pixmapSet.emit(QPixmap.fromImage(image))
                 self.txtObjTotEdit.emit(str(self.total))
                 self.txtObjInEdit.emit(str(self.line_counter.in_count))
                 self.txtObjOutEdit.emit(str(self.line_counter.out_count))
                 self.txtLavEdit.emit(str(self.nLav))
                 
-                #accende il relay
+                #turn on the relay
                 if self.first == 1:
                     GPIO.output(RELAY_PIN, GPIO.HIGH)
                     first = 0
                 
-                #controlla se ha finito la lavorazione
+                #check if processing is finished
                 if self.x==self.line_counter.in_count:
                     self.now=0
                     self.last=0
@@ -144,10 +144,10 @@ class Worker(QObject):
                     self.stop.emit()
                     self.first = 1
                     
-                    self.fineLav.emit("Lavorazione terminata", "Successo")
+                    self.fineLav.emit("Processing finished", "Success")
         
                 
-    #controllo per la funzione STOP
+    #control for the STOP function
     def setGo(self, b):
         self.go = b
         
@@ -162,47 +162,47 @@ class Worker(QObject):
         self.modello = mod
         self.model = YOLO(self.modello)
         if(n!=0):
-            self.fineLav.emit("Il programma verrà\nriavviato per apportare\nle modifiche selezionate...", "Cambio Modello")
+            self.fineLav.emit("The program will\nrestart to apply\nthe selected changes...", "Model Change")
             msg_box = QMessageBox()
             msg_box.setWindowTitle("Reset")
-            msg_box.setText("Cambio oggetto in corso...\nAzzerare il conteggio totale dei pezzi?")
+            msg_box.setText("Changing object...\nReset the total piece count?")
     
-            # Personalizza le dimensioni della finestra di dialogo
+            # Customize the dialog window size
             msg_box.setStyleSheet("QMessageBox { width: 400px;font-size: 30px; }")
             
-            # Personalizza il pulsante "No"
+            # Customize the "No" button
             no_button = msg_box.addButton("No", QMessageBox.NoRole)
             no_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px;}")
     
-            # Personalizza il pulsante "Sì"
-            yes_button = msg_box.addButton("Sì", QMessageBox.YesRole)
+            # Customize the "Yes" button
+            yes_button = msg_box.addButton("Yes", QMessageBox.YesRole)
             yes_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px; }")
             
-            # Gestisci il click dei pulsanti
+            # Handle button clicks
             msg_box.exec_()
             if msg_box.clickedButton() == yes_button:
                 self.total=0
-                self.write.emit()   #salvo le scelte
-            # Percorso dello script Bash da eseguire
+                self.write.emit()   #save choices
+            # Path to the Bash script to execute
             script_bash = "utilityFiles/riavvio.sh"
             
-            # Esegui lo script Bash
+            # Execute the Bash script
             subprocess.run(["bash", script_bash])
         
         
 
-#classe di controllo interfaccia grafica
+#class for GUI control
 class Finestra(QtWidgets.QMainWindow):
     work = Worker()
     thread = QThread()
-    start = "Lavorazione n. "
+    start = "Processing n. "
     enter = "\n"
     font = ""
     separatore = "------------------------------------------"
     tast = None
     cont = True
     
-    #costruttore dell'oggetto della classe
+    #constructor of the class object
     def __init__(self):
         super().__init__()
         
@@ -213,7 +213,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.work.crN=self.ui.createrValueN
         self.work.crC=self.ui.createrValueC
         
-        #connessione degli eventi ai bottoni e widget
+        #connect events to buttons and widgets
         self.ui.btnStart.clicked.connect(self.clickStart)
         self.ui.btnStop.clicked.connect(self.clickStop)
         self.ui.btnRestart.clicked.connect(self.clickRestart)
@@ -222,17 +222,17 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.txtObPezzi.mousePressEvent = self.tastierino
 
 
-        self.ui.groupBoxMenu.setHidden(True) #nasconde la finestra menu
-        self.ui.actionSave.setEnabled(False) #disattiva azione salva
-        self.ui.groupBoxMenu.setEnabled(False)  #disattiva la finestra menu
+        self.ui.groupBoxMenu.setHidden(True) #hide menu window
+        self.ui.actionSave.setEnabled(False) #disable save action
+        self.ui.groupBoxMenu.setEnabled(False)  #disable menu window
 
         
-        self.work.moveToThread(self.thread) #sposta la classe Work in un thread
+        self.work.moveToThread(self.thread) #move the Work class to a thread
         
-        cont, self.last,self.mod, tot=self.StartRead()  #funzione di lettura delle ultime scelte
+        cont, self.last,self.mod, tot=self.StartRead()  #function to read the last choices
         self.work.total=int(tot)    
         
-        if(cont == 0):  #se ci sono ultime scelte nel file
+        if(cont == 0):  #if there are last choices in the file
             self.ui.txtObPezzi.setPlainText(str(self.last))
             self.work.x = str(self.last)
             self.setCheck()
@@ -240,9 +240,9 @@ class Finestra(QtWidgets.QMainWindow):
         self.work.setModel(self.getChecked(),0)
             
         
-        self.thread.started.connect(self.work.run)  #connette il thread alla funzione da runnare
+        self.thread.started.connect(self.work.run)  #connect the thread to the function to run
         
-        #conetto gli impulsi alle loro funzioni
+        #connect signals to their functions
         self.work.txtObjInEdit.connect(self.update_line_in)
         self.work.txtObjOutEdit.connect(self.update_line_out)
         self.work.txtLavEdit.connect(self.update_line_lav)
@@ -253,7 +253,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.work.startLav.connect(self.update_lab) 
         self.work.write.connect(self.write_change_model)
         
-        #settaggio dei font per i widget
+        #set fonts for widgets
         self.font = self.ui.txtOb.font()
         self.font.setPointSize(24)
         self.ui.txtObjIn.setFont(self.font)
@@ -262,7 +262,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.txtLav.setFont(self.font)
         self.ui.txtObjTot.setFont(self.font)
         
-        #setto i font ai radio button
+        #set fonts for radio buttons
         font1 = QFont()
         font1.setPointSize(30)
         for valori in self.ui.radioButtons.values() :   
@@ -273,34 +273,34 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.btnStop.setStyleSheet("#btnStop{background-color: #a3a8a5;}")
         self.ui.btnRestart.setStyleSheet("#btnRestart{background-color: #a3a8a5;}")
         
-        #funzione di creazione e attivazione pulse
+        #function to create and activate pulse
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(RELAY_PIN, GPIO.OUT)
         
         GPIO.output(RELAY_PIN, GPIO.LOW)
         
-        #testo del caricamento del programma in attesa della connessione alla webcam
-        self.ui.label.setText("Caricamento...")
+        #program loading text while waiting for webcam connection
+        self.ui.label.setText("Loading...")
         custom_font = QFont()
         custom_font.setPointSize(20)
         self.ui.label.setFont(custom_font)
         self.ui.label.setAlignment(QtCore.Qt.AlignCenter)
         
-        self.thread.start() #starto il thread
+        self.thread.start() #start the thread
         
-        self.write_to_file("utilityFiles/count.txt", "\nOggetto: "+self.getNomeRadioBtn()+"\n")
+        self.write_to_file("utilityFiles/count.txt", "\nObject: "+self.getNomeRadioBtn()+"\n")
 
 
-    #funzione che gestisce il bottone start  
+    #function to handle the start button  
     def clickStart(self):
-        if self.ui.txtObPezzi.toPlainText().isdigit():  #se obiettivo pezzi è un numero e non una stringa
-            self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(), self.getChecked(), self.work.total) #scrive le scelte come ultime scelte
-            if self.work.line_counter.in_count < int(self.ui.txtObPezzi.toPlainText()) or self.work.x == self.work.line_counter.in_count: #self.work.x = obiettivo all'interno del thread | self.ui.txtObPezzi.toPlainText()=scelta modificata dall'utente dell'obiettivo
-                if self.work.modello != self.getChecked():  #se il modello è cambiato
-                    self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total)   #salvo le scelte
-                    self.work.setModel(self.getChecked(),1) #richiamo funzione
+        if self.ui.txtObPezzi.toPlainText().isdigit():  #if target pieces is a number and not a string
+            self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(), self.getChecked(), self.work.total) #write the choices as last choices
+            if self.work.line_counter.in_count < int(self.ui.txtObPezzi.toPlainText()) or self.work.x == self.work.line_counter.in_count: #self.work.x = target within the thread | self.ui.txtObPezzi.toPlainText()=user modified target
+                if self.work.modello != self.getChecked():  #if the model has changed
+                    self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total)   #save choices
+                    self.work.setModel(self.getChecked(),1) #call function
                 
-                #attivo e disattivo bottoni
+                #enable and disable buttons
                 self.ui.btnStart.setEnabled(False)
                 self.ui.btnRestart.setEnabled(False)
                 self.ui.btnStop.setEnabled(True)
@@ -308,87 +308,87 @@ class Finestra(QtWidgets.QMainWindow):
                 self.ui.btnStop.setStyleSheet("#btnStop{background-color: #c74c48;} #btnStop:hover{background-color: #ffffff;}")
                 self.ui.btnRestart.setStyleSheet("#btnRestart{background-color: #a3a8a5;}")
                 
-                if self.cont == True: #se è la prima volta che si preme start
-                    #scrivo nel file la prima lavorazione
+                if self.cont == True: #if it is the first time pressing start
+                    #write the first processing in the file
                     now = datetime.now()
                     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
                     self.write_to_file('utilityFiles/count.txt', f'{self.separatore}{self.enter}{self.start}{self.work.nLav} {dt_string}')
 
-                    #setto l'obiettivo selezionato dall'utente
+                    #set the target selected by the user
                     self.work.x = int(self.ui.txtObPezzi.toPlainText())
 
-                    self.cont = False #cont false, è solo true per la prima volta
-                    self.work.go = True #starto la lavorazione
+                    self.cont = False #cont false, only true for the first time
+                    self.work.go = True #start processing
 
-                elif self.work.x == self.work.line_counter.in_count: #se la lavorazione è finita
-                    self.work.nLav+=1 #aumento lavorazione
-                    self.work.x = int(self.ui.txtObPezzi.toPlainText()) #setto l'obiettivo selezionato dall'utente
+                elif self.work.x == self.work.line_counter.in_count: #if processing is finished
+                    self.work.nLav+=1 #increase processing
+                    self.work.x = int(self.ui.txtObPezzi.toPlainText()) #set the target selected by the user
                     
-                    #scrivo nel file la prima lavorazione
+                    #write the first processing in the file
                     now = datetime.now()
                     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
                     self.write_to_file('utilityFiles/count.txt', f'{self.separatore}{self.enter}{self.start}{self.work.nLav} {dt_string}')
                     
-                    #resetto i line counter
+                    #reset line counters
                     self.work.line_counter.in_count = 0
                     self.work.line_counter.out_count = 0
                     
-                    self.work.setGo(True) #starto la lavorazione
+                    self.work.setGo(True) #start processing
                 else:
-                    #setto l'obiettivo selezionato dall'utente
+                    #set the target selected by the user
                     self.work.x = int(self.ui.txtObPezzi.toPlainText())
                     
-                    #starto la lavorazione
+                    #start processing
                     self.work.setGo(True)
                     
                
                 
-                #setto campo di testo con l'obiettivo
-                self.ui.txtOb.setText("Obiettivo pezzi: " + str(self.work.x)) 
+                #set text field with the target
+                self.ui.txtOb.setText("Target pieces: " + str(self.work.x)) 
                 self.ui.txtOb.setFont(self.font)
 
-                #disattivo il menu
+                #disable menu
                 self.ui.groupBoxMenu.setEnabled(False)
             
-            elif self.work.line_counter.in_count == int(self.ui.txtObPezzi.toPlainText()): #se l'obiettivo selezionato è uguale a quello raggiunto nella lavorazione
-                #avverto l'utente
+            elif self.work.line_counter.in_count == int(self.ui.txtObPezzi.toPlainText()): #if the selected target is equal to the one reached in processing
+                #warn the user
                 self.show_alert_endLav()
                 
-            else: #se l'obiettivo selezionato è minore di quello raggiunto nella lavorazione
-                #avverto l'utente
-                self.showMsg("La lavorazione ha già\nraggiunto l'obiettivo\nimpostato", "Attenzione")
+            else: #if the selected target is less than the one reached in processing
+                #warn the user
+                self.showMsg("The processing has already\nreached the set target", "Attention")
         
-        else: #se il valore inserito dall'utente non è un numero
-            #avverto l'utente
-            self.showMsg("Inserire un numero\nvalido in 'Obiettivo pezzi'", "Errore")
+        else: #if the value entered by the user is not a number
+            #warn the user
+            self.showMsg("Enter a valid number\nin 'Target pieces'", "Error")
             
-    #funzione che gestisce il bottone stop
+    #function to handle the stop button
     def clickStop(self):
-        #attivo i tasti
-        GPIO.output(RELAY_PIN, GPIO.LOW) #fermo il relay
-        self.ui.groupBoxMenu.setEnabled(True) #attivo il menu
+        #enable buttons
+        GPIO.output(RELAY_PIN, GPIO.LOW) #stop the relay
+        self.ui.groupBoxMenu.setEnabled(True) #enable menu
         self.ui.btnStart.setEnabled(True)
         self.ui.btnStop.setEnabled(False)
         self.ui.btnStart.setStyleSheet("#btnStart{background-color: #48c75b;} #btnStart:hover{background-color: #ffffff;}")
         self.ui.btnStop.setStyleSheet("#btnStop{background-color: #a3a8a5;}")
         
-        if self.work.x != self.work.line_counter.in_count and self.work.line_counter.in_count!=0: #se la lavorazione non è finita attivo anche restart
+        if self.work.x != self.work.line_counter.in_count and self.work.line_counter.in_count!=0: #if processing is not finished also enable restart
             self.ui.btnRestart.setEnabled(True)
             self.ui.btnRestart.setStyleSheet("#btnRestart{background-color: #4889c7;} #btnRestart:hover{background-color: #ffffff;}")
         
-        self.work.setGo(False) #fermo la lavorazione
+        self.work.setGo(False) #stop processing
 
         
-    #funzione che gestisce il bottone restart  
+    #function to handle the restart button  
     def clickRestart(self):
-        if self.ui.txtObPezzi.toPlainText().isdigit(): #se obiettivo pezzi è un numero e non una stringa
-            if self.work.modello != self.getChecked(): #se il modello è stato cambiato
-                self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total) #scrivo nel file le ultime scelte
-                self.work.setModel(self.getChecked(),1) #cambio il modello
+        if self.ui.txtObPezzi.toPlainText().isdigit(): #if target pieces is a number and not a string
+            if self.work.modello != self.getChecked(): #if the model has changed
+                self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total) #write the last choices to the file
+                self.work.setModel(self.getChecked(),1) #change the model
             
-            self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(), self.getChecked(), self.work.total) #scrivo nel file le ultime scelte
+            self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(), self.getChecked(), self.work.total) #write the last choices to the file
 
-            #attivo e disattivo pulsanti
+            #enable and disable buttons
             self.ui.btnStart.setEnabled(False)
             self.ui.btnRestart.setEnabled(False)
             self.ui.btnStop.setEnabled(True)
@@ -396,31 +396,31 @@ class Finestra(QtWidgets.QMainWindow):
             self.ui.btnStop.setStyleSheet("#btnStop{background-color: #c74c48;} #btnStop:hover{background-color: #ffffff;}")
             self.ui.btnRestart.setStyleSheet("#btnRestart{background-color: #a3a8a5;}")
             
-            self.work.x = int(self.ui.txtObPezzi.toPlainText()) #setto l'obiettivo selezionato dall'utente
+            self.work.x = int(self.ui.txtObPezzi.toPlainText()) #set the target selected by the user
             
-            self.show_confirmation_dialog() #chiedo se l'utente vuole salvare la lavorazione o eliminarla
+            self.show_confirmation_dialog() #ask if the user wants to save the processing or delete it
 
-            #reset valori
+            #reset values
             self.work.now = 0
             self.work.last = 0
             self.work.line_counter.in_count = 0
             self.work.line_counter.out_count = 0
             
-            self.work.setGo(True) #faccio ripartire lavorazione
+            self.work.setGo(True) #restart processing
             
-            #setto l'obiettivo selezionato nel campo di testo
-            self.ui.txtOb.setText("Obiettivo pezzi: " + str(self.work.x))
+            #set the target selected in the text field
+            self.ui.txtOb.setText("Target pieces: " + str(self.work.x))
             self.ui.txtOb.setFont(self.font)
 
-            self.ui.groupBoxMenu.setEnabled(False) #disattivo il menu
+            self.ui.groupBoxMenu.setEnabled(False) #disable menu
         
-        else: #se il valore inserito dall'utente non è un numero
-            #avverto l'utente
-            self.showMsg("Inserire un numero\nvalido in 'Obiettivo pezzi'", "Errore")
+        else: #if the value entered by the user is not a number
+            #warn the user
+            self.showMsg("Enter a valid number\nin 'Target pieces'", "Error")
             
-    #funzione per il passaggio dalla view al menu
+    #function to switch from view to menu
     def changeWinMenu(self):
-        if self.ui.groupBoxView.isHidden() == False:    #se il menu è nascosto
+        if self.ui.groupBoxView.isHidden() == False:    #if the menu is hidden
             self.ui.groupBoxView.setHidden(True)
             self.ui.groupBoxMenu.setHidden(False)
             self.ui.actionMenu.setText("View")
@@ -429,48 +429,48 @@ class Finestra(QtWidgets.QMainWindow):
             self.ui.groupBoxMenu.setHidden(True)
             self.ui.actionMenu.setText("Menu")
     
-    #salvo il totale
+    #save the total
     def saveTot(self):
     
         self.clickStop()
         msg_box = QMessageBox()
         msg_box.setWindowTitle("Reset")
-        msg_box.setText("Salvando verrà importato in memoria il numero totale di pezzi lavorato fin ora e verrà azzerata la voce \'Totale Pezzi\'\nSalvare?")
+        msg_box.setText("Saving will import the total number of pieces processed so far into memory and reset the 'Total Pieces' entry\nSave?")
 
-        # Personalizza le dimensioni della finestra di dialogo
+        # Customize the dialog window size
         msg_box.setStyleSheet("QMessageBox { width: 400px;font-size: 30px; }")
         
-        # Personalizza il pulsante "No"
+        # Customize the "No" button
         no_button = msg_box.addButton("No", QMessageBox.NoRole)
         no_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px;}")
 
-        # Personalizza il pulsante "Sì"
-        yes_button = msg_box.addButton("Sì", QMessageBox.YesRole)
+        # Customize the "Yes" button
+        yes_button = msg_box.addButton("Yes", QMessageBox.YesRole)
         yes_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px; }")
         
-        # Gestisci il click dei pulsanti
+        # Handle button clicks
         msg_box.exec_()
-        if msg_box.clickedButton() == yes_button:   #se l'utente clicca 'si' stampo sul file il totale e poi lo azzero
-            self.write_to_file("utilityFiles/count.txt", "\ntotale : "+str(self.work.total)+ " giorno : "+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+"\n")
+        if msg_box.clickedButton() == yes_button:   #if the user clicks 'yes' print the total to the file and then reset it
+            self.write_to_file("utilityFiles/count.txt", "\ntotal : "+str(self.work.total)+ " day : "+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+"\n")
             self.work.total=0
         
 
-    #  FUNZIONI COLLEGATE AGLI IMPULSI PER AGGIORNARE I CAMPI DI TESTO E LE LABEL
+    #  FUNCTIONS CONNECTED TO SIGNALS TO UPDATE TEXT FIELDS AND LABELS
 
     def update_line_in(self, text):
-        self.ui.txtObjIn.setText("Pezzi Contati: " + text)
+        self.ui.txtObjIn.setText("Counted Pieces: " + text)
         self.ui.txtObjIn.setFont(self.font)
         
     def update_tot(self, text):
-        self.ui.txtObjTot.setText("Totale Pezzi: " + text)
+        self.ui.txtObjTot.setText("Total Pieces: " + text)
         self.ui.txtObjTot.setFont(self.font)
     
     def update_line_out(self, text):
-        self.ui.txtObjOut.setText("Pezzi Usciti: " + text)
+        self.ui.txtObjOut.setText("Outgoing Pieces: " + text)
         self.ui.txtObjOut.setFont(self.font)
     
     def update_line_lav(self, text):
-        self.ui.txtLav.setText("Lavorazione numero: " + text)
+        self.ui.txtLav.setText("Processing number: " + text)
         self.ui.txtLav.setFont(self.font)
         
     def update_pixmap(self, image):
@@ -478,7 +478,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.label.setPixmap(image)
 
     def update_lab(self):
-        self.ui.label.setText("Premi Start per iniziare\no\nscegli le opzioni nel Menu")
+        self.ui.label.setText("Press Start to begin\nor\nchoose options in the Menu")
         custom_font = QFont()
         custom_font.setPointSize(20);
         self.ui.label.setFont(custom_font)
@@ -489,7 +489,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.actionSave.setEnabled(True)
     
 
-    #prende il valore del radio button (modello) selezionato
+    #get the value of the selected radio button (model)
     def getChecked(self):
         for chiave, valore in self.ui.radioButtons.items():
             if valore[0].isChecked():
@@ -501,28 +501,28 @@ class Finestra(QtWidgets.QMainWindow):
                 if valore.isChecked() == True:
                     return valore.text()
     
-    #setta il giusto radio button (modello) letto dal file delle ultime scelte
+    #set the correct radio button (model) read from the last choices file
     def setCheck(self):
         for chiave, valori in self.ui.radioButtons.items():
             if chiave==self.mod:
                 for valore in valori:
                     valore.setChecked(True)
     
-    #funzione del tastierino
+    #function of the keypad
     def tastierino(self, event):
-        #mostra il tastierino e ne gestisce gli eventi
+        #show the keypad and handle events
         self.tast.show()
         self.tast.ui.txtValore.setPlainText("")
         self.tast.ui.btnOk.clicked.connect(self.salva)
         self.tast.ui.btnClose.clicked.connect(self.chiudi)
     
-    #chiudi tastierino
+    #close keypad
     def chiudi(self):
         self.ui.actionMenu.setEnabled(True)
         self.ui.groupBoxMenu.setEnabled(True)
         self.tast.close()
     
-    #salva scelta immessa dal tastierino
+    #save choice entered from the keypad
     def salva(self):
         if len(self.tast.ui.txtValore.toPlainText()) > 0 and self.tast.ui.txtValore.toPlainText() != "0":
             self.ui.txtObPezzi.setPlainText(self.tast.ui.txtValore.toPlainText())
@@ -530,41 +530,41 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.groupBoxMenu.setEnabled(True)
         self.ui.actionMenu.setEnabled(True)
     
-    #scrive sul file i dati in elaborazione
+    #write data in processing to the file
     def write_to_file(self, file_path: str, line: str) -> None:
         with open(file_path, "a") as file:
             file.write(line + "\n")
     
-    #scrive sul file le ultime scelte
+    #write the last choices to the file
     def WriteStartChoose(self, data1, data2, data3):
         try:
             with open("utilityFiles/last.txt", 'w') as file:
                 file.write(f"{data1};{data2};{data3}\n")
-            print("Scrittura nel file completata.")
+            print("Writing to file completed.")
         except Exception as e:
-            print("Si è verificato un errore durante la scrittura nel file:", e)
+            print("An error occurred while writing to the file:", e)
 
-    #legge dal file (all'avvio del programma) le ultime scelte      
+    #read the last choices from the file (at program startup)      
     def StartRead(self):
         try:
             with open("utilityFiles/last.txt", 'r') as file:
                 content = file.read()
                 if( len(content.strip()) == 0 ) : #or len(content.strip()) == 1
-                    return 1, None, None, None  # Il file è vuoto
+                    return 1, None, None, None  # The file is empty
                 else:
                     data1, data2, data3 = content.strip().split(';')
-                    return 0, data1, data2, data3  # Il file contiene dati
+                    return 0, data1, data2, data3  # The file contains data
         except FileNotFoundError:
-            print("File non trovato.")
-            return -1, None, None, None  # Codice di errore se il file non esiste o non è accessibile
+            print("File not found.")
+            return -1, None, None, None  # Error code if the file does not exist or is not accessible
         except Exception as e:
-            print("Si è verificato un errore:", e)
-            return -1, None, None, None  # Codice di errore generico
+            print("An error occurred:", e)
+            return -1, None, None, None  # Generic error code
             
     def write_change_model(self):
-        self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total)   #salvo le scelte
+        self.WriteStartChoose(self.ui.txtObPezzi.toPlainText(),self.getChecked(),self.work.total)   #save choices
     
-    #funzione generica per la message box
+    #generic function for the message box
     def showMsg(self, txt, title):
         msg = QMessageBox()
         msg.setWindowTitle(title)
@@ -572,49 +572,49 @@ class Finestra(QtWidgets.QMainWindow):
         msg.setStyleSheet("QLabel{min-width:400px; font-size: 30px; min-height:100px;} QPushButton{ width:100px; height: 50px; font-size: 18px; }")
         msg.exec_()
 
-    #message box creata per il restart (salvare il totale?)
+    #message box created for restart (save the total?)
     def show_confirmation_dialog(self):
         msg_box = QMessageBox()
         msg_box.setWindowTitle("Reset")
-        msg_box.setText("Salvare i conteggi trovati fin'ora?")
+        msg_box.setText("Save the counts found so far?")
 
-        # Personalizza le dimensioni della finestra di dialogo
+        # Customize the dialog window size
         msg_box.setStyleSheet("QMessageBox { width: 400px;font-size: 30px; }")
         
-        # Personalizza il pulsante "No"
+        # Customize the "No" button
         no_button = msg_box.addButton("No", QMessageBox.NoRole)
         no_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px;}")
 
-        # Personalizza il pulsante "Sì"
-        yes_button = msg_box.addButton("Sì", QMessageBox.YesRole)
+        # Customize the "Yes" button
+        yes_button = msg_box.addButton("Yes", QMessageBox.YesRole)
         yes_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px; }")
         
-        # Gestisci il click dei pulsanti
+        # Handle button clicks
         msg_box.exec_()
-        if msg_box.clickedButton() == yes_button:   #se la scelta è 'si' scrive sul file i dati e passsa a una nuova lavorazione
+        if msg_box.clickedButton() == yes_button:   #if the choice is 'yes' write the data to the file and move to a new processing
             self.work.nLav+=1
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
             self.write_to_file('utilityFiles/count.txt', f'{self.separatore}{self.enter}{self.start}{self.work.nLav} {dt_string}')
     
-    #alert che avverte che il cambio dell'obiettivo a progreamma in corso comporta la fine della lavorazione
+    #alert that warns that changing the target while the program is running will end the processing
     def show_alert_endLav(self):
         msg_box = QMessageBox()
-        msg_box.setWindowTitle("Attenzione")
-        msg_box.setText("Obiettivo pezzi impostato uguale\nal numero raggiunto nella lavorazione,\nla lavorazione terminerà,\nContinuare? ")
+        msg_box.setWindowTitle("Attention")
+        msg_box.setText("Target pieces set equal\nto the number reached in processing,\nprocessing will end,\nContinue? ")
 
-        # Personalizza le dimensioni della finestra di dialogo
+        # Customize the dialog window size
         msg_box.setStyleSheet("QMessageBox { width: 400px;font-size: 30px; }")
         
-        # Personalizza il pulsante "No"
+        # Customize the "No" button
         no_button = msg_box.addButton("No", QMessageBox.NoRole)
         no_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px;}")
 
-        # Personalizza il pulsante "Sì"
-        yes_button = msg_box.addButton("Sì", QMessageBox.YesRole)
+        # Customize the "Yes" button
+        yes_button = msg_box.addButton("Yes", QMessageBox.YesRole)
         yes_button.setStyleSheet("QPushButton { width: 80px; height: 40px; font-size: 18px; }")
 
-        # Gestisce il click dei pulsanti
+        # Handle button clicks
         msg_box.exec_()
         if msg_box.clickedButton() == yes_button:
             self.ui.btnStart.setEnabled(False)
@@ -627,23 +627,23 @@ class Finestra(QtWidgets.QMainWindow):
             self.work.setModel(self.getChecked(),0)
             self.work.setGo(True)
         
-            self.ui.txtOb.setText("Obiettivo pezzi: " + str(self.work.x))
-            #self.ui.txtMod.setText("Modello: " + self.work.modello)
+            self.ui.txtOb.setText("Target pieces: " + str(self.work.x))
+            #self.ui.txtMod.setText("Model: " + self.work.modello)
             self.ui.txtOb.setFont(self.font)
             #self.ui.txtMod.setFont(self.font)
             self.ui.groupBoxMenu.setEnabled(False)
 
 
-#classe di creazione tastierino
+#class to create keypad
 class Tastierino(QWidget):
     #font = QFont()
     lista = None
     listaInd = None
     
-    def __init__(self, parent): #costruttore del tastierino
+    def __init__(self, parent): #constructor of the keypad
         super().__init__(parent)
         
-        #eventi e gestione
+        #events and handling
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
@@ -662,23 +662,23 @@ class Tastierino(QWidget):
         self.lista[9].clicked.connect(lambda: self.btnClick(9))
         self.ui.btnDel.clicked.connect(self.delete)
 
-    #funzione al click del tastierino
+    #function on keypad click
     def btnClick(self, i):
         self.ui.txtValore.setPlainText(self.ui.txtValore.toPlainText() + str(i))
 
-    #funzione al click sul cancella del tastierino 
+    #function on delete click on keypad 
     def delete(self):
         if len(self.ui.txtValore.toPlainText()) > 0:
             self.ui.txtValore.setPlainText(self.ui.txtValore.toPlainText()[:-1])
     
-#richiamo del main
+#call main
 if __name__ == '__main__':
 
-    app = QApplication(sys.argv)    #creazione applicazione grafica
-    time.sleep(1)   #aspetto la creazione grafica dell'app
+    app = QApplication(sys.argv)    #create GUI application
+    time.sleep(1)   #wait for the GUI app to be created
 
-    app.setStyleSheet(Path('style.qss').read_text())    #richiamo al file qss (css di python)
-    window = Finestra() #creo l'oggetto finestra
-    window.tast = Tastierino(window)    #creo l'oggetto tastierino come figlio di finestra
+    app.setStyleSheet(Path('style.qss').read_text())    #call the qss file (python css)
+    window = Finestra() #create the window object
+    window.tast = Tastierino(window)    #create the keypad object as a child of window
     
-    sys.exit(app.exec())    #comando per eseguire la applicazione
+    sys.exit(app.exec())    #command to run the application
