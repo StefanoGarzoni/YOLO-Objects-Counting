@@ -45,8 +45,8 @@ class Worker(QObject):
     i=0
     crN=[]
     crC=[]
-    ganci=0
-    telai=0
+    obj1=0
+    obj2=0
     er=0
     lastT=0
     lastG=0
@@ -93,15 +93,15 @@ class Worker(QObject):
                 with open("utilityFiles/obj2.txt", 'r') as file:
                     content = file.read()
                 self.line_counter.in_count=int(content)
-                self.telai=int(content)
+                self.obj2=int(content)
                 self.total=int(content)
                 self.lastT=self.total
                 with open("utilityFiles/obj1.txt", 'r') as file:
                     content = file.read()
-                self.ganci=int(content)
-                self.lastG=self.ganci
+                self.obj1=int(content)
+                self.lastG=self.obj1
             except Exception as e:
-                logging.warning("Error reading files - Note that the frame and hook count starts from 0\n - error: %s",e)
+                logging.warning("Error reading files - Note that the obj1 and obj2 count starts from 0\n - error: %s",e)
 
 
         logging.info('Starting main for loop')
@@ -149,25 +149,25 @@ class Worker(QObject):
                         if id==-1:
                             continue
                         if id==1: #id frame=1 id bottle=39
-                            self.telai+=1
-                            logging.info('Incrementing frame counter: (%d)',self.telai)
+                            self.obj2+=1
+                            logging.info('Incrementing obj1 counter: (%d)',self.obj2)
                         else :
                             if id==0: #id hook=0 id phone=67
-                                self.ganci+=1
-                                logging.info('Incrementing hook counter: (%d)',self.ganci)
+                                self.obj1+=1
+                                logging.info('Incrementing obj2 counter: (%d)',self.obj1)
 
-                    if self.lastT!= self.telai or self.lastG!=self.ganci:
-                        logging.info('Changing value of hooks and frames variables -> writing to files')
+                    if self.lastT!= self.obj2 or self.lastG!=self.obj1:
+                        logging.info('Changing value of obj1 and obj2 variables -> writing to files')
                         #writing to file
-                        self.write_to_file_gt("utilityFiles/obj1.txt", f'{self.ganci}')
-                        self.write_to_file_gt("utilityFiles/obj2.txt", f'{self.telai}')
+                        self.write_to_file_gt("utilityFiles/obj1.txt", f'{self.obj1}')
+                        self.write_to_file_gt("utilityFiles/obj2.txt", f'{self.obj2}')
 
                         #query
                         conn = pymssql.connect(server=self.server, user=self.username, password=self.password, database=self.database)
                         cursor = conn.cursor()
                         logging.info('Updating the database')
                         try:
-                            cursor.execute(self.query,(self.ganci, str(self.telai)))
+                            cursor.execute(self.query,(self.obj1, str(self.obj2)))
                             conn.commit()
                             
 
@@ -179,16 +179,16 @@ class Worker(QObject):
                         finally:
                             conn.close()
 
-                    self.lastT=self.telai
-                    self.lastG=self.ganci
-                    self.total=self.telai
+                    self.lastT=self.obj2
+                    self.lastG=self.obj1
+                    self.total=self.obj2
                     
                     logging.info('Emitting data update pulses - file and graphical interface')
                     #pulses emitted by the Thread
                     self.pixmapSet.emit(QPixmap.fromImage(image))
                     self.txtObjTotEdit.emit(str(self.total))
-                    self.txtObjInEdit.emit(str(self.telai))
-                    self.txtObjOutEdit.emit(str(self.ganci))
+                    self.txtObjInEdit.emit(str(self.obj2))
+                    self.txtObjOutEdit.emit(str(self.obj1))
                     self.txtLavEdit.emit(str(self.nLav))
                     
                     if(self.i%700==0 and self.i!=0):
@@ -474,7 +474,7 @@ class Finestra(QtWidgets.QMainWindow):
     
 
     def update_line_in(self, text):
-        self.ui.txtObjIn.setText("Number of Frames: " + text)
+        self.ui.txtObjIn.setText("Number of obj2: " + text)
         self.ui.txtObjIn.setFont(self.font)
         
     def update_tot(self, text):
@@ -482,7 +482,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.txtObjTot.setFont(self.font)
     
     def update_line_out(self, text):
-        self.ui.txtObjOut.setText("Number of Hooks: " + text)
+        self.ui.txtObjOut.setText("Number of obj2: " + text)
         self.ui.txtObjOut.setFont(self.font)
     
     def update_line_lav(self, text):

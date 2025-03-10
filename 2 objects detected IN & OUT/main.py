@@ -1,4 +1,4 @@
-#MAIN DEL PROGRAMMA CON CONTEGGIO DEGLI OUT
+#MAIN PROGRAM WITH OUT COUNTING
 import sys
 from PyQt5.QtWidgets import QWidget, QApplication,QMessageBox
 from countingYoloRT10PolliciOUT import Ui_MainWindow
@@ -10,7 +10,7 @@ from pathlib import Path
 import cv2
 from ultralytics import YOLO
 import supervision as sv
-from line_zoneOUT import LineZoneNew #file con conteggio out: line_zoneOUT.py
+from line_zoneOUT import LineZoneNew #file with out count: line_zoneOUT.py
 import pymssql
 import logging
 from datetime import datetime
@@ -28,10 +28,10 @@ LINE_END = sv.Point(200, 480)#720, 1000  |320, 480
 logging.basicConfig(filename=fileLog, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-#thread contenente il for
+#thread containing the for loop
 class Worker(QObject):   
-    #creazione variabili
-    logging.info('Creazione classe worker')
+    #variable creation
+    logging.info('Creating worker class')
     space = [0,0,1,0,0,0,0,0]
     go = False
     last = 0
@@ -46,45 +46,45 @@ class Worker(QObject):
     i=0
     crN=[]
     crC=[]
-    ganci=0
-    telai=0
-    ganciOut=0
-    telaiOut=0
+    obj1=0
+    obj2=0
+    obj1Out=0
+    obj2Out=0
     er=0
     lastT=0
     lastG=0
     lastTo=0
     lastGo=0
 
-    server = "192.168.7.226\sqlexpress"
-    database = "ScambioVisione"
-    username = "visione"
-    password = "Visione123!"
-    queryOut="UPDATE tblScambioVisioneOut SET Bilancelle = %d, Telai = %s, BilancelleOut= %s, TelaiOut= %s WHERE IduScambioVisione = 10" #query per aggiornamento OUT
-    query = "UPDATE tblScambioVisione SET Bilancelle = %d, Telai = %s WHERE IduScambioVisione = 10" 
-    queryLettura= "SELECT * FROM tblControllo"
-    queryError="INSERT INTO tbllogErrori (Errore, DataOra) VALUES (%s, %s)"
+    server = "dbIP"
+    database = "dbName"
+    username = "username"
+    password = "password"
+    queryOut="UPDATE tblCountingOut SET obj1 = %d, obj2 = %s, obj1Out= %s, obj2Out= %s WHERE idRow = 1" #query for OUT update
+    query = "UPDATE tblCounting SET obj1 = %d, Obj2 = %s WHERE idRow = 1" 
+    queryRead= "SELECT * FROM tblCtrl"
+    queryError="INSERT INTO tblLogErrors (Error, DateTime) VALUES (%s, %s)"
     
-    logging.info('Collegamento impulsi')
-    #creazione impulsi del thread
-    txtObjTotEdit = pyqtSignal(str) #impulso per modificare il campo di testo del totale
-    txtObjInEdit = pyqtSignal(str)  #impulso per modificare il campo di testo degli oggetti contati
-    txtObjOutEdit = pyqtSignal(str) #impulso per modificare il campo di testo degli oggetti in uscita
-    txtLavEdit = pyqtSignal(str)    #impulso per modificare il campo di testo del cambio lavorazione
-    pixmapSet = pyqtSignal(QPixmap) #impulso per inviare alla label i frame del video
-    startLav = pyqtSignal() #impulso per segnare che inizia la lavorazione
-    telaiOutEdit = pyqtSignal(str)
+    logging.info('Connecting pulses')
+    #creation of thread signals
+    txtObjTotEdit = pyqtSignal(str) #signal to modify the total text field
+    txtObjInEdit = pyqtSignal(str)  #signal to modify the counted objects text field
+    txtObjOutEdit = pyqtSignal(str) #signal to modify the outgoing objects text field 
+    txtLavEdit = pyqtSignal(str)    #signal to modify the work change text field
+    pixmapSet = pyqtSignal(QPixmap) #signal to send video frames to the label
+    startLav = pyqtSignal() #signal to mark the start of processing
+    obj2OutEdit = pyqtSignal(str)
     
     
-    #funzione contenente il FOR della detection Object
+    #function containing the Object detection FOR loop
     def run(self):
 
         global day
         global fileLog
 
-        logging.info('avvio metodo run')
+        logging.info('starting run method')
 
-        self.go = True #starto la lavorazione
+        self.go = True #start processing
         self.line_counter = LineZoneNew(start=LINE_START, end=LINE_END)
         line_annotator = sv.LineZoneAnnotator(thickness=2, text_thickness=1, text_scale=0.5)
         box_annotator = sv.BoxAnnotator(
@@ -93,43 +93,43 @@ class Worker(QObject):
             text_scale=0.5
         )
 
-        logging.info('recupero dei dati dai file telai.txt e ganci.txt')
+        logging.info('retrieving data from obj1.txt and obj2.txt files')
         if self.er==0:
             self.er=1
             try:
-                with open("utilityFiles/telai.txt", 'r') as file:
+                with open("utilityFiles/obj1.txt", 'r') as file:
                     content = file.read()
                 self.line_counter.in_count=int(content)
-                self.telai=int(content)
+                self.obj2=int(content)
                 self.total=int(content)
                 self.lastT=self.total
 
-                with open("utilityFiles/ganci.txt", 'r') as file:
+                with open("utilityFiles/obj2.txt", 'r') as file:
                     content = file.read()
-                self.ganci=int(content)
-                self.lastG=self.ganci
+                self.obj1=int(content)
+                self.lastG=self.obj1
 
-                with open("utilityFiles/ganciOut.txt", 'r') as file:
+                with open("utilityFiles/obj1Out.txt", 'r') as file:
                     content = file.read()
-                self.ganciOut=int(content)
-                self.lastGo=self.ganciOut
+                self.obj1Out=int(content)
+                self.lastGo=self.obj1Out
 
-                with open("utilityFiles/telaiOut.txt", 'r') as file:
+                with open("utilityFiles/obj2Out.txt", 'r') as file:
                     content = file.read()
-                self.telaiOut=int(content)
-                self.lastTo=self.telaiOut
+                self.obj2Out=int(content)
+                self.lastTo=self.obj2Out
                 self.line_counter.out_count=(self.lastTo+self.lastGo)
 
             except Exception as e:
-                logging.warning("Errore nella lettura dei file - Attenzione il conteggio telai e ganci parte da 0\n - errore: %s",e)
+                logging.warning("Error reading files - Warning obj2 and obj1 count starts from 0\n - error: %s",e)
 
 
-        logging.info('avvio del ciclo for principale')
+        logging.info('starting main for loop')
         try:
 
             for result in self.model.track(source=0, stream=True, agnostic_nms=True, device=0, conf=0.5):
 
-                logging.info('Ciclo n: %d',self.i)
+                logging.info('Cycle n: %d',self.i)
                 if self.start == True:
                     self.startLav.emit()
                     self.start = False
@@ -159,7 +159,7 @@ class Worker(QObject):
                     line_annotator.annotate(frame=frame, line_counter=self.line_counter)
 
                     
-                    #adattamento frame immagine a QImage per mostrarlo
+                    #adapting frame image to QImage to display it
                     height, width, bytesPerComponent = frame.shape
                     bytesPerLine = bytesPerComponent * width
                     
@@ -170,36 +170,36 @@ class Worker(QObject):
                     for id in ris:
                         if id==-1:
                             continue
-                        if id==1: #id telaio=1 id bottle=39
-                            self.telai+=1
-                            logging.info('incremento contatore telai : (%d)',self.telai)
+                        if id==1: #id frame=1 id bottle=39
+                            self.obj2+=1
+                            logging.info('incrementing obj1 counter : (%d)',self.obj2)
                         else :
-                            if id==0: #id gancio=0 id telefono=67
-                                self.ganci+=1
-                                logging.info('incremento contatore ganci : (%d)',self.ganci)
+                            if id==0: #id hook=0 id phone=67
+                                self.obj1+=1
+                                logging.info('incrementing obj2 counter : (%d)',self.obj1)
 
                     for id1 in ris_out:
                         if id1==-1:
                             continue
-                        if id1==1: #id telaio=1 id bottle=39
-                            self.telaiOut+=1
-                            logging.info('numero telai out : (%d)',self.telaiOut)
+                        if id1==1: #id frame=1 id bottle=39
+                            self.obj2Out+=1
+                            logging.info('number of obj1 out : (%d)',self.obj2Out)
                         else :
-                            if id1==0: #id gancio=0 id telefono=67
-                                self.ganciOut+=1
-                                logging.info('numero ganci out : (%d)',self.ganciOut)
+                            if id1==0: #id hook=0 id phone=67
+                                self.obj1Out+=1
+                                logging.info('number of obj2 out : (%d)',self.obj1Out)
                     ctrlValue=0
-                    if self.lastT!= self.telai or self.lastG!=self.ganci:
-                        logging.info('cambio valore delle variabili ganci e telai -> scrivo nei files')
-                        #scrittura su file
-                        self.write_to_file_gt("utilityFiles/ganci.txt", f'{self.ganci}')
-                        self.write_to_file_gt("utilityFiles/telai.txt", f'{self.telai}')
+                    if self.lastT!= self.obj2 or self.lastG!=self.obj1:
+                        logging.info('changing value of obj1 and obj2 variables -> writing to files')
+                        #writing to file
+                        self.write_to_file_gt("utilityFiles/obj1.txt", f'{self.obj1}')
+                        self.write_to_file_gt("utilityFiles/obj2.txt", f'{self.obj2}')
                         ctrlValue=1
                     
-                    if self.lastTo!= self.telaiOut or self.lastGo!=self.ganciOut:
-                        logging.info('cambio valore delle variabili ganci e telai OUT -> scrivo nei files')
-                        self.write_to_file_gt("utilityFiles/ganciOut.txt", f'{self.ganciOut}')
-                        self.write_to_file_gt("utilityFiles/telaiOut.txt", f'{self.telaiOut}')
+                    if self.lastTo!= self.obj2Out or self.lastGo!=self.obj1Out:
+                        logging.info('changing value of obj1 and obj2 OUT variables -> writing to files')
+                        self.write_to_file_gt("utilityFiles/obj1Out.txt", f'{self.obj1Out}')
+                        self.write_to_file_gt("utilityFiles/obj2Out.txt", f'{self.obj2Out}')
                         ctrlValue=1
 
                     if(ctrlValue==1):
@@ -208,114 +208,114 @@ class Worker(QObject):
                         cursor = conn.cursor()
                         
                         try:
-                            logging.info('aggiorno il database')
-                            cursor.execute(self.queryOut,(str(self.ganci), str(self.telai), str(self.ganciOut), str(self.telaiOut)))
+                            logging.info('updating the database')
+                            cursor.execute(self.queryOut,(str(self.obj1), str(self.obj2), str(self.obj1Out), str(self.obj2Out)))
                             conn.commit()
                             
 
                         except Exception as e:
-                            logging.error('Errore durante l esecuzione della query: %s',e)
-                            print(f"Errore durante l'esecuzione della query: {e}")
+                            logging.error('Error during query execution: %s',e)
+                            print(f"Error during query execution: {e}")
                             conn.rollback()
 
                         finally:
                             conn.close()
 
-                    self.lastT=self.telai
-                    self.lastG=self.ganci
-                    self.total=self.telai
-                    self.lastTo=self.telaiOut
-                    self.lastGo=self.ganciOut
+                    self.lastT=self.obj2
+                    self.lastG=self.obj1
+                    self.total=self.obj2
+                    self.lastTo=self.obj2Out
+                    self.lastGo=self.obj1Out
                     
-                    logging.info('emissione degli impulsi di aggiornamento dati - file e interfaccia grafica')
-                    #impulsi emessi dal Thread
+                    logging.info('emitting data update signals - file and GUI')
+                    #signals emitted by the Thread
                     self.pixmapSet.emit(QPixmap.fromImage(image))
                     self.txtObjTotEdit.emit(str(self.total))
-                    self.txtObjInEdit.emit(str(self.telai))
-                    self.txtObjOutEdit.emit(str(self.ganci))
-                    self.txtLavEdit.emit(str(self.ganciOut)) #impulso ganci out
-                    self.telaiOutEdit.emit(str(self.telaiOut)) #impulso telai out
+                    self.txtObjInEdit.emit(str(self.obj2))
+                    self.txtObjOutEdit.emit(str(self.obj1))
+                    self.txtLavEdit.emit(str(self.obj1Out)) #obj2 out signal
+                    self.obj2OutEdit.emit(str(self.obj2Out)) #obj1 out signal
 
                     if(self.i%700==0 and self.i!=0):
                         try:
-                            logging.info('Lettura del file contenente la temperatura')
+                            logging.info('Reading the file containing the temperature')
                             try:
                                 with open("/sys/devices/virtual/thermal/thermal_zone0/temp") as temp_file:
                                     temp = temp_file.read().strip()
-                                    temp_celsius = float(temp) / 1000.0 #conversione
-                                logging.info("temperatura registrata: %s",temp_celsius)
+                                    temp_celsius = float(temp) / 1000.0 #conversion
+                                logging.info("recorded temperature: %s",temp_celsius)
                             except Exception as e:
                                 temp_celsius=0.0
-                                logging.error("Errore durante il recupero della temperatura della CPU dal file :", e)
+                                logging.error("Error retrieving CPU temperature from file :", e)
 
                             if(temp_celsius>=55 and temp_celsius<70):
-                                logging.info('temperature oltre i 55 gradi')
+                                logging.info('temperature over 55 degrees')
                                 
                             elif temp_celsius>=70 and temp_celsius <78:
-                                logging.info('temperature oltre i 70 gradi')
+                                logging.info('temperature over 70 degrees')
                                 
                             elif temp_celsius>=78 and temp_celsius <85:
-                                logging.info('temperature oltre i 78 gradi')
+                                logging.info('temperature over 78 degrees')
                                
                             elif temp_celsius>=85:
-                                logging.error('temperature oltre i 85 gradi -> blocco del ciclo for')
+                                logging.error('temperature over 85 degrees -> stopping for loop')
                                 try:
                                     conn = pymssql.connect(server=self.server, user=self.username, password=self.password, database=self.database)
                                     cursor = conn.cursor()
                                     n = datetime.now()
                                     stringa_data_ora = n.strftime("%Y-%m-%d %H:%M:%S")
-                                    cursor.execute(self.queryError,( 'temperature oltre i 85 gradi -> blocco del ciclo for', str(stringa_data_ora)))
+                                    cursor.execute(self.queryError,( 'temperature over 85 degrees -> stopping for loop', str(stringa_data_ora)))
                                     conn.commit()
-                                    logging.warning("Errore segnalato sul database")
+                                    logging.warning("Error reported on database")
                                 except Exception as er:
-                                    logging.error('Errore durante la connessione al database: %s',er)
+                                    logging.error('Error connecting to database: %s',er)
                                 finally:
                                     conn.close()
                                     ctrlTemp=True
                                     while ctrlTemp:
-                                        self.pixmapSet.emit("errore : attesa temperatura adeguata\nContattare un tecnico") #test aggiornamento label video
+                                        self.pixmapSet.emit("error : waiting for adequate temperature\nContact a technician") #test updating video label
                                         time.sleep(60)
-                                        logging.warning('Lettura del file contenente la temperatura in attesa che sia sotto i 80 gradi')
+                                        logging.warning('Reading the file containing the temperature waiting for it to be below 80 degrees')
                                         try:
                                             with open("/sys/devices/virtual/thermal/thermal_zone0/temp") as temp_file:
                                                 temp = temp_file.read().strip()
-                                                temp_celsius = float(temp) / 1000.0 #conversione
+                                                temp_celsius = float(temp) / 1000.0 #conversion
                                             if temp_celsius < 70:
-                                                logging.warning("temperatura abbassata : %s", temp_celsius)
+                                                logging.warning("lowered temperature : %s", temp_celsius)
                                                 ctrlTemp=False
                                             else:
-                                                logging.warning("ritento tra 1m | temperatura NON abbastanza basse : %s", temp_celsius)
+                                                logging.warning("retrying in 1m | temperature NOT low enough : %s", temp_celsius)
                                         except Exception as e: 
-                                            logging.error("errore nella lettura del file temperature %s",e)
+                                            logging.error("error reading temperature file %s",e)
 
 
                             else:
-                                logging.info('temperatura minore di 55 gradi ')
+                                logging.info('temperature below 55 degrees ')
                                 
 
                         except Exception as e:
-                            logging.critical('Errore nella lettura della temperatura: %s', e)
+                            logging.critical('Error reading temperature: %s', e)
 
                         try:
-                            logging.info('Check della tabella tblControllo (nel for)')
+                            logging.info('Check of tblControllo table (in for loop)')
                             conn = pymssql.connect(server=self.server, user=self.username, password=self.password, database=self.database)
                             cursor = conn.cursor()
                         
-                            cursor.execute(self.queryLettura)
+                            cursor.execute(self.queryRead)
                             row = cursor.fetchone()
                             value = row[1]
                             
                             if value==0:
-                                logging.info('value = 0 -> riavvio del programma e attesa value= 1')
+                                logging.info('value = 0 -> restarting program and waiting for value= 1')
                                 conn.close()
-                                script_bash = "utilityFiles/riavvioOUT.sh"
+                                script_bash = "utilityFiles/reboot.sh"
                                 subprocess.run(["bash", script_bash])
                             else:
-                                logging.info('value = 1 -> continuo esecuzione del programma')
+                                logging.info('value = 1 -> continuing program execution')
                                 
                         except Exception as e:
-                            logging.error('Errore durante l esecuzione della query: %s',e)
-                            print(f"Errore durante l'esecuzione della query: {e}")
+                            logging.error('Error during query execution: %s',e)
+                            print(f"Error during query execution: {e}")
                             conn.rollback()
                         finally:
                             conn.close()
@@ -324,14 +324,14 @@ class Worker(QObject):
                 if day !=  datetime.today().date():
                     day=datetime.today().date()
                     fileLog='filesLog/'+str(day)+'.log'
-                    logging.info('FINE GIORNO - CAMBIO DEL FILE .LOG')
+                    logging.info('END OF DAY - CHANGING .LOG FILE')
                     logging.shutdown() 
                     os.rename(fileLog, 'filesLog/'+str(day)+'.log')  
                     logging.basicConfig(filename='filesLog/'+str(day)+'.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-                    logging.info('CAMBIO GIORNO - INIZIO NUOVO FILE .LOG') 
+                    logging.info('NEW DAY - STARTING NEW .LOG FILE') 
 
         except Exception as e:
-            logging.critical('ERRORE GENERATO NEL FOR PRINCIPALE : %s',e)
+            logging.critical('ERROR GENERATED IN MAIN FOR LOOP : %s',e)
             try:
                 conn = pymssql.connect(server=self.server, user=self.username, password=self.password, database=self.database)
                 cursor = conn.cursor()
@@ -339,14 +339,14 @@ class Worker(QObject):
                 stringa_data_ora = n.strftime("%Y-%m-%d %H:%M:%S")
                 cursor.execute(self.queryError,( str(e), str(stringa_data_ora)))
                 conn.commit()
-                logging.warning("Errore segnalato sul database")
+                logging.warning("Error reported on database")
             except Exception as er:
-                logging.error('Errore durante la connessione al database: %s',er)
+                logging.error('Error connecting to database: %s',er)
             finally:
                 conn.close()
 
-            logging.warning("RIAVVIO PROGRAMMA - TENTATIVO DI RISOLVERE L'ERRORE")
-            script_bash = "utilityFiles/riavvioOUT.sh"
+            logging.warning("RESTARTING PROGRAM - ATTEMPTING TO RESOLVE ERROR")
+            script_bash = "utilityFiles/reboot.sh"
             subprocess.run(["bash", script_bash])
             #sys.exit(0)
                 
@@ -361,22 +361,22 @@ class Worker(QObject):
         print((cr))
     
     def setModel(self, mod):
-        logging.info("settaggio del modello - ceazione oggetto YOLO model - modello : %s",mod)
+        logging.info("setting model - creating YOLO model object - model : %s",mod)
         self.modello = mod
         self.model = YOLO(self.modello)
         
         
 
-#classe di controllo interfaccia grafica
+#GUI control class
 class Finestra(QtWidgets.QMainWindow):
-    logging.info('Creazione della classe Finestra - oggetto worker - thread')
+    logging.info('Creating Window class - worker object - thread')
     work = Worker()
     thread = QThread()
     font = ""
-    cont = True #serve solo per ricevere un valore (che non serve in questo programma) da startRead
+    cont = True #only used to receive a value (not needed in this program) from startRead
     ctrlStart=True
     
-    #costruttore dell'oggetto della classe
+    #object constructor of the class
     def __init__(self):
         super().__init__()
         
@@ -390,38 +390,38 @@ class Finestra(QtWidgets.QMainWindow):
         global day
         global fileLog
 
-        #connessione degli eventi ai bottoni e widget
+        #connecting events to buttons and widgets
         self.ui.btnStart.clicked.connect(self.clickStart)
         self.ui.btnStop.clicked.connect(self.clickStop)
         self.ui.btnRestart.clicked.connect(self.clickRestart)
         self.ui.actionMenu.triggered.connect(self.changeWinMenu)
         self.ui.actionSave.triggered.connect(self.saveTot)
 
-        self.ui.groupBoxMenu.setHidden(True) #nasconde la finestra menu
-        self.ui.actionSave.setEnabled(False) #disattiva azione salva
-        self.ui.groupBoxMenu.setEnabled(False)  #disattiva la finestra menu
+        self.ui.groupBoxMenu.setHidden(True) #hides the menu window
+        self.ui.actionSave.setEnabled(False) #disables save action
+        self.ui.groupBoxMenu.setEnabled(False)  #disables the menu window
 
         
-        self.work.moveToThread(self.thread) #sposta la classe Work in un thread
+        self.work.moveToThread(self.thread) #moves the Work class to a thread
           
         modelloScelto="modelli_in_uso/v8s2000.pt"
         self.work.setModel(modelloScelto)
             
-        logging.info('connessione della funzione run al thread')
-        self.thread.started.connect(self.work.run)  #connette il thread alla funzione da runnare
+        logging.info('connecting run function to thread')
+        self.thread.started.connect(self.work.run)  #connects the thread to the function to be run
         
-        logging.info('connessione degli impulsi alle funzioni')
-        #conetto gli impulsi alle loro funzioni
+        logging.info('connecting signals to functions')
+        #connecting signals to their functions
         self.work.txtObjInEdit.connect(self.update_line_in)
         self.work.txtObjOutEdit.connect(self.update_line_out)
-        self.work.txtLavEdit.connect(self.update_line_lav) #modificata con ganci out
+        self.work.txtLavEdit.connect(self.update_line_lav) #modified with obj2 out
         self.work.pixmapSet.connect(self.update_pixmap)
-        self.work.txtObjTotEdit.connect(self.update_tot) #continua solo a scrivere status running
+        self.work.txtObjTotEdit.connect(self.update_tot) #continues to only write status running
         self.work.startLav.connect(self.update_lab) 
-        self.work.telaiOutEdit.connect(self.updateOut) #aggiunta per telai out
+        self.work.obj2OutEdit.connect(self.updateOut) #added for obj1 out
         
-        logging.info('settaggio dei font e dell interfaccia grafica')
-        #settaggio dei font per i widget
+        logging.info('setting fonts and GUI interface')
+        #setting fonts for widgets
         self.font = self.ui.txtOb.font()
         self.font.setPointSize(24)
         self.ui.txtObjIn.setFont(self.font)
@@ -430,7 +430,7 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.txtLav.setFont(self.font)
         self.ui.txtObjTot.setFont(self.font)
         
-        #setto i font ai radio button
+        #setting fonts for radio buttons
         font1 = QFont()
         font1.setPointSize(30)
         for valori in self.ui.radioButtons.values() :   
@@ -442,14 +442,14 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.btnRestart.setStyleSheet("#btnRestart{background-color: #a3a8a5;}")
         
 
-        #testo del caricamento del programma in attesa della connessione alla webcam
-        self.ui.label.setText("Attendo...")#Caricamento
+        #loading program text while waiting for webcam connection
+        self.ui.label.setText("Waiting...")#Loading
         custom_font = QFont()
         custom_font.setPointSize(20)
         self.ui.label.setFont(custom_font)
         self.ui.label.setAlignment(QtCore.Qt.AlignCenter)
         
-        logging.info('primo check della tabella tblControllo')
+        logging.info('first check of tblControllo table')
 
         log=0
         while self.ctrlStart:
@@ -457,19 +457,19 @@ class Finestra(QtWidgets.QMainWindow):
                 conn = pymssql.connect(server=self.work.server, user=self.work.username, password=self.work.password, database=self.work.database)
                 cursor = conn.cursor()
                 try:
-                    cursor.execute(self.work.queryLettura)
+                    cursor.execute(self.work.queryRead)
                     row = cursor.fetchone()
                     value = row[1]
                     
                     if value==1:
-                        logging.info('value = 1 - termino il ciclo while - start del thread con bit go messo a True')
+                        logging.info('value = 1 - ending while loop - starting thread with go bit set to True')
                         self.ctrlStart=False
-                        self.thread.start() #starto il thread
-                        self.work.go = True #starto la lavorazione
+                        self.thread.start() #starting the thread
+                        self.work.go = True #starting processing
         
                 except Exception as e:
-                    logging.error('Errore durante l esecuzione della query: %s',e)
-                    print(f"Errore durante l'esecuzione della query: {e}")
+                    logging.error('Error during query execution: %s',e)
+                    print(f"Error during query execution: {e}")
                     conn.rollback()
 
                 finally:
@@ -480,38 +480,38 @@ class Finestra(QtWidgets.QMainWindow):
                         if day !=  datetime.today().date():
                             day=datetime.today().date()
                             fileLog='filesLog/'+str(day)+'.log'
-                            logging.info('FINE GIORNO - CAMBIO DEL FILE .LOG')
+                            logging.info('END OF DAY - CHANGING .LOG FILE')
                             logging.shutdown() 
                             os.rename(fileLog, 'filesLog/'+str(day)+'.log')  
                             logging.basicConfig(filename='filesLog/'+str(day)+'.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-                            logging.info('CAMBIO GIORNO - INIZIO NUOVO FILE .LOG')  
+                            logging.info('NEW DAY - STARTING NEW .LOG FILE')  
 
-                    logging.info('value = 0 - Ricontrollo tra 30 secondi...')
-                    print("Value = 0 - Ricontrollo tra 30 secondi...")
+                    logging.info('value = 0 - Rechecking in 30 seconds...')
+                    print("Value = 0 - Rechecking in 30 seconds...")
                     time.sleep(30)
                     log+=1
 
 
 
-    #funzione che gestisce il bottone start  
+    #function that handles start button  
     def clickStart(self):
-        perche="tolta per programma telai"
+        why="removed for frames program"
        
-    #funzione che gestisce il bottone stop
+    #function that handles stop button
     def clickStop(self):
-        perche="tolta per programma telai"
+        why="removed for frames program"
         
-    #funzione che gestisce il bottone restart  
+    #function that handles restart button  
     def clickRestart(self):
-        perche="tolta per programma telai"
+        why="removed for frames program"
     
-    #salvo il totale
+    #save the total
     def saveTot(self):
-        perche="tolta per programma telai"
+        why="removed for frames program"
             
-    #funzione per il passaggio dalla view al menu
+    #function for switching from view to menu
     def changeWinMenu(self):
-        if self.ui.groupBoxView.isHidden() == False:    #se il menu è nascosto
+        if self.ui.groupBoxView.isHidden() == False:    #if the menu is hidden
             self.ui.groupBoxView.setHidden(True)
             self.ui.groupBoxMenu.setHidden(False)
             self.ui.actionMenu.setText("View")
@@ -522,7 +522,7 @@ class Finestra(QtWidgets.QMainWindow):
     
 
     def update_line_in(self, text):
-        self.ui.txtObjIn.setText("Numero Telai: " + text)
+        self.ui.txtObjIn.setText("Number of obj1: " + text)
         self.ui.txtObjIn.setFont(self.font)
         
     def update_tot(self, text):
@@ -530,41 +530,41 @@ class Finestra(QtWidgets.QMainWindow):
         self.ui.txtObjTot.setFont(self.font)
     
     def update_line_out(self, text):
-        self.ui.txtObjOut.setText("Numero Ganci: " + text)
+        self.ui.txtObjOut.setText("Number of obj2: " + text)
         self.ui.txtObjOut.setFont(self.font)
     
     def update_line_lav(self, text):
-        self.ui.txtLav.setText("Ganci OUT : " + text)
+        self.ui.txtLav.setText("obj1 OUT : " + text)
         self.ui.txtLav.setFont(self.font)
         
     def update_pixmap(self, image):
         self.ui.label.setText("")
         self.ui.label.setPixmap(image)
 
-    #aggiunta per modifica programma OUT
+    #added for OUT program modification
     def updateOut(self, text):
-        self.ui.txtOb.setText("Telai OUT : "+ text)
+        self.ui.txtOb.setText("obj2 OUT : "+ text)
         self.ui.txtOb.setFont(self.font)
 
 
     def update_lab(self):
-        self.ui.label.setText("Premi Start per iniziare\no\nscegli le opzioni nel Menu")
+        self.ui.label.setText("Press Start to begin\nor\nchoose options in the Menu")
         custom_font = QFont()
         custom_font.setPointSize(20)
         self.ui.label.setFont(custom_font)
         self.ui.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.ui.groupBoxMenu.setEnabled(False) #CAMBIATO PER PROGRAMMA TELAI
+        self.ui.groupBoxMenu.setEnabled(False) #CHANGED FOR FRAMES PROGRAM
         self.ui.btnStart.setEnabled(True)
         self.ui.btnStart.setStyleSheet("#btnStart{background-color: #48c75b;} ")##btnStart:hover{background-color: #ffffff;}
     
     
-#richiamo del main
+#main call
 if __name__ == '__main__':
 
-    app = QApplication(sys.argv)    #creazione applicazione grafica
-    time.sleep(1)   #aspetto la creazione grafica dell'app
+    app = QApplication(sys.argv)    #creating graphical application 
+    time.sleep(1)   #waiting for app graphical creation
 
-    app.setStyleSheet(Path('style.qss').read_text())    #richiamo al file qss (css di python)
-    window = Finestra() #creo l'oggetto finestra
+    app.setStyleSheet(Path('style.qss').read_text())    #calling qss file (python css)
+    window = Finestra() #creating window object
     
-    sys.exit(app.exec())    #comando per eseguire la applicazione
+    sys.exit(app.exec())    #command to execute the application
