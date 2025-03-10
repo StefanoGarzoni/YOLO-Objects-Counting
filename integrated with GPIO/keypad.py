@@ -1,50 +1,50 @@
-#codice per testierino
+#code for keypad
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-#classe tastierino (form)
+#keypad class (form)
 class Ui_Form(object):
     def setupUi(self, Form):
-        Form.setObjectName("Form") #set nome form
-        Form.resize(451, 544) #dimensioni tastierio
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred) #politiche di ridimensionamento tastierino (cerca di rimanere delle sue dimensioni)
+        Form.setObjectName("Form") #set form name
+        Form.resize(451, 544) #keypad dimensions
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred) #keypad resizing policies (tries to maintain its dimensions)
         
-        #impedisco ridimensionamento manuale tasterino
+        #prevent manual keypad resizing
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
 
-        Form.setSizePolicy(sizePolicy) #applico politche di ridimensionamento al form
-        Form.setMinimumSize(QtCore.QSize(451, 544)) #set dimensioni minime
-        Form.setMaximumSize(QtCore.QSize(451, 544)) #set dimensioni massime
+        Form.setSizePolicy(sizePolicy) #apply resizing policies to form
+        Form.setMinimumSize(QtCore.QSize(451, 544)) #set minimum dimensions
+        Form.setMaximumSize(QtCore.QSize(451, 544)) #set maximum dimensions
 
-        self.txtValore = QtWidgets.QTextEdit(Form) #creo schermo del tastierino
-        self.txtValore.setGeometry(QtCore.QRect(10, 80, 431, 81)) #dimensioni schermo tastierino
+        self.txtValore = QtWidgets.QTextEdit(Form) #create keypad display
+        self.txtValore.setGeometry(QtCore.QRect(10, 80, 431, 81)) #keypad display dimensions
 
-        #font schermo tastierino
+        #keypad display font
         font = QtGui.QFont()
         font.setPointSize(45)
         self.txtValore.setFont(font)
 
-        self.txtValore.setReadOnly(True) #setto schermo a non modificabile dall'utente
-        self.txtValore.setObjectName("txtValore") #set nome
+        self.txtValore.setReadOnly(True) #set display as not modifiable by user
+        self.txtValore.setObjectName("txtValore") #set name
 
-        #layout a griglia per i pulsanti 
-        self.gridLayoutWidget = QtWidgets.QWidget(Form) #creazione gridLayout
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 190, 411, 341)) #dimensioni gridLayout
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget") #set nome
-        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget) #aggancio gridLayout 
-        self.gridLayout.setContentsMargins(0, 0, 0, 0) #margini layout
-        self.gridLayout.setObjectName("gridLayout") #set nome
+        #grid layout for buttons
+        self.gridLayoutWidget = QtWidgets.QWidget(Form) #create gridLayout
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 190, 411, 341)) #gridLayout dimensions
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget") #set name
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget) #attach gridLayout
+        self.gridLayout.setContentsMargins(0, 0, 0, 0) #layout margins
+        self.gridLayout.setObjectName("gridLayout") #set name
 
-        #BOTTONI TASTIERINO
-        self.btn4 = QtWidgets.QPushButton(self.gridLayoutWidget) #creazione bottone e aggiunta al gridLayout
-        self.btn4.setMinimumSize(QtCore.QSize(0, 80)) #set dimensione minima
+        #KEYPAD BUTTONS
+        self.btn4 = QtWidgets.QPushButton(self.gridLayoutWidget) #create button and add to gridLayout
+        self.btn4.setMinimumSize(QtCore.QSize(0, 80)) #set minimum size
         #font
         font = QtGui.QFont()
         font.setPointSize(40)
         self.btn4.setFont(font)
-        self.btn4.setObjectName("btn4")#set nome
-        self.gridLayout.addWidget(self.btn4, 1, 0, 1, 1) #aggancio widget al gridLayout
+        self.btn4.setObjectName("btn4")#set name
+        self.gridLayout.addWidget(self.btn4, 1, 0, 1, 1) #attach widget to gridLayout
 
         #7
         self.btn7 = QtWidgets.QPushButton(self.gridLayoutWidget)
@@ -60,7 +60,7 @@ class Ui_Form(object):
         self.btnOk.setMinimumSize(QtCore.QSize(0, 80))
         self.btnOk.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("img/50_Ok.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off) #icona bottone Ok
+        icon.addPixmap(QtGui.QPixmap("img/50_Ok.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off) #OK button icon
         self.btnOk.setIcon(icon)
         self.btnOk.setIconSize(QtCore.QSize(46, 46))
         self.btnOk.setObjectName("btnOk")
@@ -102,7 +102,7 @@ class Ui_Form(object):
         self.btn0.setObjectName("btn0")
         self.gridLayout.addWidget(self.btn0, 3, 1, 1, 1)
 
-        #CANCELLA
+        #DELETE
         self.btnDel = QtWidgets.QPushButton(self.gridLayoutWidget)
         self.btnDel.setMinimumSize(QtCore.QSize(0, 80))
         self.btnDel.setText("")
@@ -148,7 +148,7 @@ class Ui_Form(object):
         self.btn3.setObjectName("btn3")
         self.gridLayout.addWidget(self.btn3, 0, 2, 1, 1)
 
-        #ESCI
+        #EXIT
         self.btnClose = QtWidgets.QToolButton(Form)
         self.btnClose.setGeometry(QtCore.QRect(380, 10, 61, 61))
         font = QtGui.QFont()
@@ -159,14 +159,14 @@ class Ui_Form(object):
         self.btnClose.setIconSize(QtCore.QSize(43, 43))
         self.btnClose.setObjectName("btnClose")
 
-        self.retranslateUi(Form) #richiamo funzione sottostante
-        QtCore.QMetaObject.connectSlotsByName(Form) #gestione automatica dei segnali (eventi)
+        self.retranslateUi(Form) #call the function below
+        QtCore.QMetaObject.connectSlotsByName(Form) #automatic signal handling (events)
 
-    #funzione creata in automatico da pyqt-Designer, setto i titoli e i testi
-    #per maggiori informazioni controllare retranslateUi di countingYoloRt.py
+    #function automatically created by pyqt-Designer, sets titles and texts
+    #for more information check retranslateUi in countingYoloRt.py
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Tastierino"))
+        Form.setWindowTitle(_translate("Form", "Keypad"))
         self.txtValore.setHtml(_translate("Form", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
