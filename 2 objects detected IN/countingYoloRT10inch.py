@@ -151,7 +151,7 @@ class Ui_MainWindow(object):
         self.txtObjTot.setObjectName("txtTot")  #set name
         self.verticalLayout.addWidget(self.txtObjTot)   #add to child vertical layout
 
-        #text box (another type) containing the tag "fenixTek..." etc.
+        #text box (another type) containing the tag etc.
         self.txtTag_2 = QtWidgets.QPlainTextEdit(self.groupBoxView) #creation and addition to groupBox
         self.txtTag_2.setGeometry(QtCore.QRect(25, 475, 480, 250))   #set dimensions
 
@@ -195,7 +195,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)    #set margin size
         self.verticalLayout_2.setObjectName("verticalLayout_2") #set name
 
-        #text box (another type) containing the tag "fenixTek..." etc. (this inside the 'Menu' window)
+        #text box (another type) containing the tag etc. (this inside the 'Menu' window)
         self.txtTag = QtWidgets.QPlainTextEdit(self.groupBoxMenu)   #creation and attachment to group box
         self.txtTag.setGeometry(QtCore.QRect(25, 475, 480, 30)) #set dimensions
 
@@ -306,35 +306,35 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:20pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Numero Telai: </span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">obj1 Count: </span></p></body></html>"))
         self.createrValueC=[0,1,0,0,0,1,1,1, 0,1,1,0,0,0,0,1, 0,1,1,1,0,0,1,0, 0,1,1,1,1,0,1,0, 0,1,1,0,1,1,1,1, 0,1,1,0,1,1,1,0, 0,1,1,0,1,0,0,1]
         self.txtObjOut.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:20pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Numero Ganci:</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">obj2 Count: </span></p></body></html>"))
         self.txtLav.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:20pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Lavorazione numero: </span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Processing number: </span></p></body></html>"))
         self.createrValueN = [0,1,0,1,0,0,1,1, 0,1,1,1,0,1,0,0, 0,1,1,0,0,1,0,1, 0,1,1,0,0,1,1,0, 0,1,1,0,0,0,0,1, 0,1,1,0,1,1,1,0, 0,1,1,0,1,1,1,1]
         self.txtOb.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:20pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Obiettivo pezzi:      /</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Target pieces:      /</span></p></body></html>"))
         self.txtObjTot.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:20pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt;\">Status:</span></p></body></html>"))
-        self.txtTag_2.setPlainText(_translate("MainWindow", "Fenix Tek Srl ®  |  0365 388032  |  All Rights Reserved ™"))
+        self.txtTag_2.setPlainText(_translate("MainWindow", "Stefano Garzoni ®  | |  All Rights Reserved ™"))
         self.groupBoxMenu.setTitle(_translate("MainWindow", "Menu"))
-        self.groupBoxMod.setTitle(_translate("MainWindow", "Seleziona modello:"))
+        self.groupBoxMod.setTitle(_translate("MainWindow", "Select model:"))
 
-        self.txtTag.setPlainText(_translate("MainWindow", "Fenix Tek Srl ®  |  0365 388032  |  All Rights Reserved ™"))
-        self.plainTextEdit.setPlainText(_translate("MainWindow", "Obiettivo pezzi:"))
+        self.txtTag.setPlainText(_translate("MainWindow", "Stefano Garzoni ®  | |  All Rights Reserved ™"))
+        self.plainTextEdit.setPlainText(_translate("MainWindow", "Target pieces:"))
         self.txtObPezzi.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -342,9 +342,9 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">/</p></body></html>"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.actionMenu.setText(_translate("MainWindow", "Menu"))
-        self.actionMenu.setToolTip(_translate("MainWindow", "Cambia Schermata"))
-        self.actionSave.setText(_translate("MainWindow", "Salva"))
-        self.actionSave.setToolTip(_translate("MainWindow", "Salva e azzera il totale"))
+        self.actionMenu.setToolTip(_translate("MainWindow", "Change Screen"))
+        self.actionSave.setText(_translate("MainWindow", "Save"))
+        self.actionSave.setToolTip(_translate("MainWindow", "Save and reset total"))
     
     #function to read models.txt file and fill two-dimensional lists
     def read_file(self):

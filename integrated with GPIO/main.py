@@ -3,7 +3,7 @@
 import sys
 from PyQt5.QtWidgets import QWidget, QApplication,QMessageBox
 from countingYoloRT import Ui_MainWindow
-from tastierino import Ui_Form
+from keypad import Ui_Form
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QPixmap, QImage, QFont
 from PyQt5.QtCore import QThread, QObject, pyqtSignal
