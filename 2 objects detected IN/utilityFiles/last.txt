@@ -1,1 +1,1 @@
-      /;modelli_in_uso/yolov8s.pt;0
+      /;modelli_in_uso/example.pt;0
