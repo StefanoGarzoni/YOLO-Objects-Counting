@@ -84,7 +84,8 @@ Ideal for automated sorting systems or production lines requiring direct machine
 -------------------------------------------------------------
 
 💡 WHY THIS SYSTEM?  
-This project was developed to address real-world industrial needs, providing a flexible, accurate, and easy-to-use object counting system. By combining real-time deep learning-based detection, an intuitive GUI, and hardware interaction capabilities, it offers an adaptable solution for smart factories, automated warehouses, and production monitoring.
+This project was developed to address real-world industrial needs, providing a flexible, accurate, and easy-to-use object counting system.  
+By combining real-time deep learning-based detection, an intuitive GUI, and hardware interaction capabilities, it offers an adaptable solution for smart factories, automated warehouses, and production monitoring.
 
 -------------------------------------------------------------
 
