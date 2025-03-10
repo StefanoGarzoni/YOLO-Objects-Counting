@@ -102,7 +102,7 @@ class LineZoneNew:
 
             self.tracker_state[tracker_id] = tracker_state
             if tracker_state:
-                if class_id == 1: #1 = Telaio
+                if class_id == 1: #1 = obj1
                     self.in_count += 1
                 crossed_in[i] = class_id
             else:

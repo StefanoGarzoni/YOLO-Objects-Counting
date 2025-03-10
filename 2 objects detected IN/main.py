@@ -359,7 +359,7 @@ class Finestra(QtWidgets.QMainWindow):
         
         self.work.moveToThread(self.thread) #moves the Work class to a thread
           
-        modelloScelto="modelli_in_uso/1v86008.pt"
+        modelloScelto="modelli_in_uso/example.pt"
         self.work.setModel(modelloScelto)
             
         logging.info('Connecting the run function to the thread')
