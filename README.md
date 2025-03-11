@@ -90,4 +90,5 @@ By combining real-time deep learning-based detection, an intuitive GUI, and hard
 -------------------------------------------------------------
 
 📌 WANT TO CUSTOMIZE IT FOR YOUR SPECIFIC USE CASE?    
+N.B.: The choice of the object to be analyzed can clearly be customized, contact me if you want to know more about it.  
 All features are modular and can be adjusted to fit your needs. Start building your own YOLO-powered counting system today! 🚀
