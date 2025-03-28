@@ -35,7 +35,8 @@ Ideal for automated sorting systems or production lines requiring direct machine
 
 ----------------------------------------------------------------------
 
-📂 PROGRAM STRUCTURE & BREAKDOWN  
+📂 PROGRAM STRUCTURE & BREAKDOWN 
+
 
 1️⃣ "2 objects detected IN"  
 
@@ -91,4 +92,9 @@ By combining real-time deep learning-based detection, an intuitive GUI, and hard
 
 📌 WANT TO CUSTOMIZE IT FOR YOUR SPECIFIC USE CASE?    
 N.B.: The choice of the object to be analyzed can clearly be customized, contact me if you want to know more about it.  
-All features are modular and can be adjusted to fit your needs. Start building your own YOLO-powered counting system today! 🚀
+All features are modular and can be adjusted to fit your needs. Start building your own YOLO-powered counting system today! 🚀  
+
+  
+📌 Here is an example of the program in operation
+
+ ![IMG_0696](https://github.com/user-attachments/assets/639ffa31-f22a-4944-a73e-8a9866445279)
