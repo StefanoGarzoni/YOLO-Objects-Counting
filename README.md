@@ -1,4 +1,4 @@
-# YOLO-Object-Counting
+# YOLO-Objects-Counting
 This repository contains a set of three object detection and counting programs designed for NVIDIA Jetson devices with 10-inch displays. These programs are optimized for real-time industrial applications, providing an intuitive graphical user interface (GUI) and leveraging YOLO deep learning models (both pre-trained and custom-trained).  
 
 
